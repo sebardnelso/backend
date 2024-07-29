@@ -76,6 +76,7 @@ app.get('/clientes', (req, res) => {
 // Endpoint para obtener pedidos por codcli
 app.get('/pedidos/:codcli', (req, res) => {
     const { codcli } = req.params;
+    const { zona } = req.query; 
     const query = 'SELECT * FROM aus_ped WHERE codcli = ? and zona = ?';
     db.query(query, [codcli], (err, results) => {
         if (err) {
