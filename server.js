@@ -38,6 +38,10 @@ const handleDbError = (err) => {
 };
 
 db.on('error', handleDbError);
+// Endpoint raíz
+app.get('/', (req, res) => {
+    res.send('servidor funcionando');
+});
 
 // Endpoint de login
 app.post('/login', (req, res) => {
@@ -76,8 +80,9 @@ app.get('/clientes', (req, res) => {
 // Endpoint para obtener pedidos por codcli
 app.get('/pedidos/:codcli', (req, res) => {
     const { codcli } = req.params;
-    const query = 'SELECT * FROM aus_ped WHERE codcli = ?';
-    db.query(query, [codcli], (err, results) => {
+    const { zona } = req.query; // Asegúrate de recibir la zona
+    const query = 'SELECT * FROM aus_ped WHERE codcli = ? AND zona = ?';
+    db.query(query, [codcli, zona], (err, results) => {
         if (err) {
             handleDbError(err);
             res.status(500).send(err);
@@ -146,7 +151,7 @@ app.post('/pedidos/actualizar_realiza', (req, res) => {
     });
 });
 
-const port = 3000;
-app.listen(port, () => {
+const port = 3001;
+app.listen(port, '0.0.0.0', () => {
     console.log(`Server running on port ${port}`);
 });
