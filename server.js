@@ -76,8 +76,8 @@ app.get('/clientes', (req, res) => {
 app.get('/pedidos/:codcli', (req, res) => {
     const { codcli } = req.params;
     const zona = req.user.zona; // Suponiendo que la zona está disponible en req.user
-
-    const query = 'SELECT * FROM aus_ped WHERE codcli = ? AND zona = ?';
+    
+    const query = 'SELECT * FROM aus_ped WHERE codcli = ?';
     db.query(query, [codcli, zona], (err, results) => {
         if (err) {
             handleDbError(err);
