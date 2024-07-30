@@ -73,9 +73,9 @@ app.get('/clientes', (req, res) => {
     });
 });
 
+// Endpoint para obtener pedidos por codcli
 app.get('/pedidos/:codcli', (req, res) => {
     const { codcli } = req.params;
-    
     const query = 'SELECT * FROM aus_ped WHERE codcli = ?';
     db.query(query, [codcli], (err, results) => {
         if (err) {
@@ -86,7 +86,6 @@ app.get('/pedidos/:codcli', (req, res) => {
         res.send(results);
     });
 });
-
 
 // Endpoint para finalizar pedidos
 app.post('/pedidos/finalizar', (req, res) => {
