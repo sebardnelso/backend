@@ -92,9 +92,8 @@ app.get('/pedidos/:codcli', (req, res) => {
     });
 });
 
-// Verificar si un pedido ya está siendo realizado
 app.post('/pedidos/verificar_realiza', (req, res) => {
-    const { codcli, zona } = req.body;
+    const { codcli, zona, username } = req.body;
     const query = 'SELECT realiza FROM aus_ped WHERE codcli = ? AND zona = ? AND realiza IS NOT NULL';
     db.query(query, [codcli, zona], (err, results) => {
         if (err) {
@@ -103,12 +102,18 @@ app.post('/pedidos/verificar_realiza', (req, res) => {
             return;
         }
         if (results.length > 0) {
-            res.json({ success: true, realiza: results[0].realiza });
+            const realiza = results[0].realiza;
+            if (realiza === username) {
+                res.json({ success: true, canProceed: true });
+            } else {
+                res.json({ success: true, realiza, canProceed: false });
+            }
         } else {
             res.json({ success: false });
         }
     });
 });
+
 
 // Endpoint para actualizar el campo 'realiza' en pedidos
 app.post('/pedidos/actualizar_realiza', (req, res) => {
