@@ -38,6 +38,7 @@ const handleDbError = (err) => {
 };
 
 db.on('error', handleDbError);
+
 // Endpoint raíz
 app.get('/', (req, res) => {
     res.send('servidor funcionando');
@@ -91,7 +92,7 @@ app.get('/pedidos/:codcli', (req, res) => {
     });
 });
 
-//verificar si un pedido ya está siendo realizado
+// Verificar si un pedido ya está siendo realizado
 app.post('/pedidos/verificar_realiza', (req, res) => {
     const { codcli, zona } = req.body;
     const query = 'SELECT realiza FROM aus_ped WHERE codcli = ? AND zona = ? AND realiza IS NOT NULL';
@@ -125,16 +126,6 @@ app.post('/pedidos/actualizar_realiza', (req, res) => {
     });
 });
 
-    // Ejecutar todas las consultas en paralelo
-    Promise.all(queries)
-        .then(results => {
-            res.json({ success: true });
-        })
-        .catch(err => {
-            console.error('Error finalizing orders:', err);
-            res.status(500).json({ success: false, error: 'Internal Server Error' });
-        });
-
 // Endpoint para actualizar pedidos
 app.put('/pedidos/:codori', (req, res) => {
     const { codori } = req.params;
@@ -146,22 +137,6 @@ app.put('/pedidos/:codori', (req, res) => {
             res.status(500).json({ success: false, error: 'Internal Server Error' });
             return;
         }
-        res.json({ success: true });
-    });
-});
-
-// Endpoint para actualizar el campo 'realiza' en pedidos
-app.post('/pedidos/actualizar_realiza', (req, res) => {
-    const { codcli, realiza, zona } = req.body;
-    console.log('Received update request with:', { codcli, realiza, zona }); // Para depuración
-    const query = 'UPDATE aus_ped SET realiza = ? WHERE codcli = ? AND zona = ?';
-    db.query(query, [realiza, codcli, zona], (err, results) => {
-        if (err) {
-            handleDbError(err);
-            res.status(500).json({ success: false, error: 'Internal Server Error' });
-            return;
-        }
-        console.log('Update results:', results); // Para depuración
         res.json({ success: true });
     });
 });
