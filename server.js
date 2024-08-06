@@ -164,8 +164,8 @@ app.post('/pedidos/finalizar', (req, res) => {
     const queries = updates.map(update => {
         return new Promise((resolve, reject) => {
             // Usar codcli y codori en lugar de solo codori
-            const query = 'UPDATE aus_ped SET cantidad_real = ?, ter = 1 WHERE codcli = ? AND codori = ?';
-            db.query(query, [update.cantidad_real, update.codcli, update.codori], (err, results) => {
+            const query = 'UPDATE aus_ped SET cantidad_real = ?, ter = ? WHERE codcli = ? AND codori = ?';
+            db.query(query, [update.cantidad_real, update.ter, update.codcli, update.codori], (err, results) => {
                 if (err) {
                     return reject(err);
                 }
@@ -184,6 +184,7 @@ app.post('/pedidos/finalizar', (req, res) => {
             res.status(500).json({ success: false, error: 'Internal Server Error' });
         });
 });
+
 
 
 const port = 3001;
