@@ -91,7 +91,7 @@ app.get('/pedidos/:codcli', (req, res) => {
     });
 });
 
-// Endpoint para verificar si un pedido ya está siendo realizado
+//verificar si un pedido ya está siendo realizado
 app.post('/pedidos/verificar_realiza', (req, res) => {
     const { codcli, zona } = req.body;
     const query = 'SELECT realiza FROM aus_ped WHERE codcli = ? AND zona = ? AND realiza IS NOT NULL';
