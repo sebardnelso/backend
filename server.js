@@ -91,22 +91,24 @@ app.get('/pedidos/:codcli', (req, res) => {
     });
 });
 
-// Endpoint para finalizar pedidos
-app.post('/pedidos/finalizar', (req, res) => {
-    const updates = req.body.updates;
-
-    // Construir una consulta que actualice varios registros
-    let queries = updates.map(update => {
-        return new Promise((resolve, reject) => {
-            const query = 'UPDATE aus_ped SET cantidad_real = ?, ter = ? WHERE codori = ?';
-            db.query(query, [update.cantidad_real, update.ter, update.codori], (err, results) => {
-                if (err) {
-                    return reject(err);
-                }
-                resolve(results);
-            });
-        });
+// Endpoint para verificar si un pedido ya está siendo realizado
+app.post('/pedidos/verificar_realiza', (req, res) => {
+    const { codcli, zona } = req.body;
+    const query = 'SELECT realiza FROM aus_ped WHERE codcli = ? AND zona = ? AND realiza IS NOT NULL';
+    db.query(query, [codcli, zona], (err, results) => {
+        if (err) {
+            handleDbError(err);
+            res.status(500).json({ success: false, error: 'Internal Server Error' });
+            return;
+        }
+        if (results.length > 0) {
+            res.json({ success: true, realiza: results[0].realiza });
+        } else {
+            res.json({ success: false });
+        }
     });
+});
+
 
     // Ejecutar todas las consultas en paralelo
     Promise.all(queries)
