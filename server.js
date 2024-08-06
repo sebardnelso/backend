@@ -77,11 +77,10 @@ app.get('/clientes', (req, res) => {
     });
 });
 
-// Endpoint para obtener pedidos por codcli
 app.get('/pedidos/:codcli', (req, res) => {
     const { codcli } = req.params;
-    const { zona } = req.query; // Asegúrate de recibir la zona
-    const query = 'SELECT * FROM aus_ped WHERE codcli = ? AND zona = ?';
+    const { zona } = req.query;
+    const query = 'SELECT * FROM aus_ped WHERE codcli = ? AND zona = ? ORDER BY ubicacion ASC';
     db.query(query, [codcli, zona], (err, results) => {
         if (err) {
             handleDbError(err);
