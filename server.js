@@ -12,7 +12,7 @@ let db = mysql.createPool({
     host: '190.228.29.61',
     user: 'kalel2016',
     password: 'Kalel2016',
-    database: 'ausoltest',
+    database: 'ausol',
     waitForConnections: true,
     queueLimit: 0,
     debug: false
