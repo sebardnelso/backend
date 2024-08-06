@@ -136,10 +136,10 @@ app.put('/pedidos/:codori', (req, res) => {
 
 // Endpoint para actualizar el campo 'realiza' en pedidos
 app.post('/pedidos/actualizar_realiza', (req, res) => {
-    const { codcli, realiza } = req.body;
-    console.log('Received update request with:', { codcli, realiza }); // Para depuración
-    const query = 'UPDATE aus_ped SET realiza = ? WHERE codcli = ?';
-    db.query(query, [realiza, codcli], (err, results) => {
+    const { codcli, realiza, zona } = req.body;
+    console.log('Received update request with:', { codcli, realiza, zona }); // Para depuración
+    const query = 'UPDATE aus_ped SET realiza = ? WHERE codcli = ? AND zona = ?';
+    db.query(query, [realiza, codcli, zona], (err, results) => {
         if (err) {
             handleDbError(err);
             res.status(500).json({ success: false, error: 'Internal Server Error' });
