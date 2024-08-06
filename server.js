@@ -134,7 +134,6 @@ app.post('/pedidos/actualizar_realiza', (req, res) => {
             console.error('Error finalizing orders:', err);
             res.status(500).json({ success: false, error: 'Internal Server Error' });
         });
-});
 
 // Endpoint para actualizar pedidos
 app.put('/pedidos/:codori', (req, res) => {
