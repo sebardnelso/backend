@@ -151,6 +151,7 @@ app.put('/pedidos/:codori', (req, res) => {
         res.json({ success: true });
     });
 });
+
 // Endpoint para finalizar pedidos
 app.post('/pedidos/finalizar', (req, res) => {
     const updates = req.body.updates;
@@ -163,8 +164,9 @@ app.post('/pedidos/finalizar', (req, res) => {
     // Construir y ejecutar las consultas de actualización
     const queries = updates.map(update => {
         return new Promise((resolve, reject) => {
-            const query = 'UPDATE aus_ped SET cantidad_real = ?, ter = ? WHERE codori = ?';
-            db.query(query, [update.cantidad_real, update.ter, update.codori], (err, results) => {
+            // Usar codcli y codori en lugar de solo codori
+            const query = 'UPDATE aus_ped SET cantidad_real = ?, ter = ? WHERE codcli = ? AND codori = ?';
+            db.query(query, [update.cantidad_real, update.ter, update.codcli, update.codori], (err, results) => {
                 if (err) {
                     return reject(err);
                 }
@@ -183,6 +185,7 @@ app.post('/pedidos/finalizar', (req, res) => {
             res.status(500).json({ success: false, error: 'Internal Server Error' });
         });
 });
+
 
 const port = 3001;
 app.listen(port, '0.0.0.0', () => {
