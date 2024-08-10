@@ -67,12 +67,13 @@ app.post('/login', (req, res) => {
 app.get('/clientes', (req, res) => {
     const { zona } = req.query;
     
-    // Consulta para obtener codcli, fecha, realiza, y codemp
+    // Consulta para obtener codcli, fecha, realiza, y el codemp único
     const query = `
-        SELECT DISTINCT p.codcli, p.fecha, p.realiza, f.codemp 
+        SELECT p.codcli, p.fecha, p.realiza, MAX(f.codemp) AS codemp
         FROM aus_ped p
         JOIN aus_famov f ON p.codcli = f.codcli
         WHERE p.zona = ? AND p.ter != 1
+        GROUP BY p.codcli, p.fecha, p.realiza;
     `;
 
     db.query(query, [zona], (err, results) => {
@@ -84,6 +85,7 @@ app.get('/clientes', (req, res) => {
         res.send(results);
     });
 });
+
 
 
 app.get('/pedidos/:codcli', (req, res) => {
