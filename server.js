@@ -63,11 +63,18 @@ app.post('/login', (req, res) => {
     });
 });
 
-// Endpoint para obtener clientes
+// Endpoint para obtener clientes con codemp
 app.get('/clientes', (req, res) => {
     const { zona } = req.query;
-    // Filtrar clientes donde ter != 1
-    const query = 'SELECT DISTINCT codcli, fecha, realiza FROM aus_ped WHERE zona = ? AND ter != 1';
+    
+    // Consulta para obtener codcli, fecha, realiza, y codemp
+    const query = `
+        SELECT DISTINCT p.codcli, p.fecha, p.realiza, f.codemp 
+        FROM aus_ped p
+        JOIN aus_famov f ON p.codcli = f.codcli
+        WHERE p.zona = ? AND p.ter != 1
+    `;
+
     db.query(query, [zona], (err, results) => {
         if (err) {
             handleDbError(err);
@@ -77,6 +84,7 @@ app.get('/clientes', (req, res) => {
         res.send(results);
     });
 });
+
 
 app.get('/pedidos/:codcli', (req, res) => {
     const { codcli } = req.params;
