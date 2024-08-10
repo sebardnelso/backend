@@ -157,17 +157,25 @@ app.post('/pedidos/actualizar_realiza', (req, res) => {
     });
 });
 
-// Endpoint para actualizar pedidos
 app.put('/pedidos/:codori', (req, res) => {
-    const { codori } = req.params;
-    const { ter, cantidad_real } = req.body;
-    const query = 'UPDATE aus_ped SET ter = ?, cantidad_real = ? WHERE codori = ?';
-    db.query(query, [ter, cantidad_real, codori], (err, results) => {
+    const codori = req.params.codori;
+    const { cantidad_real, ter, codbarped } = req.body;
+
+    // Validar datos recibidos
+    if (!cantidad_real || !ter || !codbarped) {
+        return res.status(400).json({ success: false, error: 'Faltan campos requeridos' });
+    }
+
+    // Construir la consulta SQL
+    const query = 'UPDATE aus_ped SET cantidad_real = ?, ter = ?, codbarped = ? WHERE codori = ?';
+
+    // Ejecutar la consulta
+    db.query(query, [cantidad_real, ter, codbarped, codori], (err, results) => {
         if (err) {
-            handleDbError(err);
-            res.status(500).json({ success: false, error: 'Internal Server Error' });
-            return;
+            console.error('Error al actualizar el pedido:', err);
+            return res.status(500).json({ success: false, error: 'Error en el servidor' });
         }
+
         res.json({ success: true });
     });
 });
