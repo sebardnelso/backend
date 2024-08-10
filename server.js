@@ -91,7 +91,16 @@ app.get('/clientes', (req, res) => {
 app.get('/pedidos/:codcli', (req, res) => {
     const { codcli } = req.params;
     const { zona } = req.query;
-    const query = 'SELECT * FROM aus_ped WHERE codcli = ? AND zona = ? ORDER BY ubicacion ASC';
+
+    const query = `
+        SELECT p.*, a.denom
+        FROM aus_ped p
+        JOIN aus_art a 
+        ON REPLACE(p.codori, '-', ' ') = a.codbar
+        WHERE p.codcli = ? AND p.zona = ?
+        ORDER BY p.ubicacion ASC;
+    `;
+
     db.query(query, [codcli, zona], (err, results) => {
         if (err) {
             handleDbError(err);
@@ -101,6 +110,7 @@ app.get('/pedidos/:codcli', (req, res) => {
         res.send(results);
     });
 });
+
 
 app.post('/pedidos/verificar_realiza', (req, res) => {
     const { codcli, zona, username } = req.body;
