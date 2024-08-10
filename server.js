@@ -8,7 +8,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 let db = mysql.createPool({
-    connectionLimit: 10, // Número máximo de conexiones en el pool
+    connectionLimit: 10,
     host: '190.228.29.61',
     user: 'kalel2016',
     password: 'Kalel2016',
@@ -18,11 +18,9 @@ let db = mysql.createPool({
     debug: false
 });
 
-// Re-crear el pool en caso de pérdida de conexión
 const handleDbError = (err) => {
     console.error('Database connection error:', err);
     if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-        // Reconectar en caso de pérdida de conexión
         console.log('Reconnecting to the database...');
         db = mysql.createPool({
             connectionLimit: 10,
@@ -67,7 +65,6 @@ app.post('/login', (req, res) => {
 app.get('/clientes', (req, res) => {
     const { zona } = req.query;
     
-    // Consulta para obtener codcli, fecha, realiza, y el codemp único
     const query = `
         SELECT p.codcli, p.fecha, p.realiza, MAX(f.codemp) AS codemp
         FROM aus_ped p
@@ -85,8 +82,6 @@ app.get('/clientes', (req, res) => {
         res.send(results);
     });
 });
-
-
 
 app.get('/pedidos/:codcli', (req, res) => {
     const { codcli } = req.params;
@@ -111,7 +106,6 @@ app.get('/pedidos/:codcli', (req, res) => {
     });
 });
 
-
 app.post('/pedidos/verificar_realiza', (req, res) => {
     const { codcli, zona, username } = req.body;
     const query = 'SELECT realiza FROM aus_ped WHERE codcli = ? AND zona = ?';
@@ -124,13 +118,10 @@ app.post('/pedidos/verificar_realiza', (req, res) => {
         if (results.length > 0) {
             const realiza = results[0].realiza;
             if (!realiza) {
-                // Si el campo 'realiza' está vacío, permitir el pedido
                 res.json({ success: false });
             } else if (realiza === username) {
-                // Si el campo 'realiza' coincide con el username, permitir el pedido
                 res.json({ success: true, canProceed: true });
             } else {
-                // Si el campo 'realiza' no coincide con el username, no permitir el pedido
                 res.json({ success: true, realiza, canProceed: false });
             }
         } else {
@@ -139,12 +130,9 @@ app.post('/pedidos/verificar_realiza', (req, res) => {
     });
 });
 
-
-
-// Endpoint para actualizar el campo 'realiza' en pedidos
 app.post('/pedidos/actualizar_realiza', (req, res) => {
     const { codcli, realiza, zona } = req.body;
-    console.log('Received update request with:', { codcli, realiza, zona }); // Para depuración
+    console.log('Received update request with:', { codcli, realiza, zona });
     const query = 'UPDATE aus_ped SET realiza = ? WHERE codcli = ? AND zona = ?';
     db.query(query, [realiza, codcli, zona], (err, results) => {
         if (err) {
@@ -152,7 +140,7 @@ app.post('/pedidos/actualizar_realiza', (req, res) => {
             res.status(500).json({ success: false, error: 'Internal Server Error' });
             return;
         }
-        console.log('Update results:', results); // Para depuración
+        console.log('Update results:', results);
         res.json({ success: true });
     });
 });
@@ -175,12 +163,10 @@ app.put('/pedidos/:codori', (req, res) => {
 app.post('/pedidos/finalizar', (req, res) => {
     const updates = req.body.updates;
 
-    // Verificar que updates es un array
     if (!Array.isArray(updates)) {
         return res.status(400).json({ success: false, error: 'Invalid data format' });
     }
 
-    // Construir y ejecutar las consultas de actualización
     const queries = updates.map(update => {
         return new Promise((resolve, reject) => {
             const query = 'UPDATE aus_ped SET cantidad_real = ?, ter = ? WHERE codcli = ? AND zona = ? AND codori = ?';
@@ -193,7 +179,6 @@ app.post('/pedidos/finalizar', (req, res) => {
         });
     });
 
-    // Ejecutar todas las consultas
     Promise.all(queries)
         .then(results => {
             res.json({ success: true });
@@ -203,9 +188,6 @@ app.post('/pedidos/finalizar', (req, res) => {
             res.status(500).json({ success: false, error: 'Internal Server Error' });
         });
 });
-
-
-
 
 const port = 3001;
 app.listen(port, '0.0.0.0', () => {
