@@ -114,30 +114,37 @@ app.get('/pedidos/:codcli', (req, res) => {
 
 app.post('/pedidos/verificar_realiza', (req, res) => {
     const { codcli, zona, username } = req.body;
-    const query = 'SELECT realiza FROM aus_ped WHERE codcli = ? AND zona = ?';
+    const query = 'SELECT codori, realiza FROM aus_ped WHERE codcli = ? AND zona = ?';
+    
     db.query(query, [codcli, zona], (err, results) => {
         if (err) {
             console.error('Error querying database:', err);
             res.status(500).json({ success: false, error: 'Internal Server Error' });
             return;
         }
-        if (results.length > 0) {
-            const realiza = results[0].realiza;
-            if (!realiza) {
-                // Si el campo 'realiza' está vacío, permitir el pedido
-                res.json({ success: false });
-            } else if (realiza === username) {
-                // Si el campo 'realiza' coincide con el username, permitir el pedido
-                res.json({ success: true, canProceed: true });
-            } else {
-                // Si el campo 'realiza' no coincide con el username, no permitir el pedido
-                res.json({ success: true, realiza, canProceed: false });
+        
+        let canProceed = true;
+        let currentRealiza = null;
+        
+        for (let row of results) {
+            const realiza = row.realiza;
+            
+            if (realiza && realiza !== username) {
+                // Si hay alguna línea con realiza no vacío y no coincide con el username, no permitir
+                canProceed = false;
+                currentRealiza = realiza;
+                break;
             }
-        } else {
-            res.json({ success: false });
         }
+        
+        res.json({
+            success: true,
+            canProceed,
+            realiza: currentRealiza
+        });
     });
 });
+
 
 
 
