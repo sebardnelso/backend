@@ -183,11 +183,30 @@ app.post('/pedidos/finalizar', (req, res) => {
     // Construir y ejecutar las consultas de actualización
     const queries = updates.map(update => {
         return new Promise((resolve, reject) => {
-            const query = 'UPDATE aus_ped SET cantidad_real = ?, ter = ?, codbarped = ? WHERE codcli = ? AND zona = ? AND codori = ?';
-            db.query(query, [update.cantidad_real, update.ter, update.codbarped, update.codcli, update.zona, update.codori], (err, results) => {
+            const query = `
+                UPDATE aus_ped 
+                SET 
+                    cantidad_real = ?, 
+                    ter = ?, 
+                    codbarped = ? 
+                WHERE 
+                    codcli = ? 
+                    AND zona = ? 
+                    AND codori = ?`;
+            
+            db.query(query, [
+                update.cantidad_real, 
+                update.ter, 
+                update.codbarped, 
+                update.codcli, 
+                update.zona, 
+                update.codori
+            ], (err, results) => {
                 if (err) {
+                    console.error('Error al actualizar la base de datos:', err);
                     return reject(err);
                 }
+                console.log(`Pedido actualizado: codori=${update.codori}, cantidad_real=${update.cantidad_real}, ter=${update.ter}, codbarped=${update.codbarped}`);
                 resolve(results);
             });
         });
@@ -196,16 +215,14 @@ app.post('/pedidos/finalizar', (req, res) => {
     // Ejecutar todas las consultas
     Promise.all(queries)
         .then(results => {
+            console.log('Todos los pedidos han sido actualizados con éxito.');
             res.json({ success: true });
         })
         .catch(err => {
-            console.error('Error finalizing orders:', err);
+            console.error('Error al finalizar los pedidos:', err);
             res.status(500).json({ success: false, error: 'Internal Server Error' });
         });
 });
-
-
-
 
 
 const port = 3001;
