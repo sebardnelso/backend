@@ -224,6 +224,30 @@ app.post('/pedidos/finalizar', (req, res) => {
         });
 });
 
+app.post('/pedidos/updateRealiza', (req, res) => {
+    const { codcli, zona, username } = req.body;
+
+    if (!codcli || !zona || !username) {
+        return res.status(400).send('Faltan parámetros necesarios');
+    }
+
+    // Actualiza los pedidos en la base de datos
+    const query = `
+        UPDATE aus_ped
+        SET realiza = ?
+        WHERE codcli = ? AND zona = ? AND ter <> 1
+    `;
+    
+    db.query(query, [username, codcli, zona], (err, results) => {
+        if (err) {
+            console.error('Error al actualizar los pedidos:', err);
+            return res.status(500).send('Error al actualizar los pedidos');
+        }
+
+        console.log('Pedidos actualizados:', results.affectedRows);
+        res.status(200).send('Pedidos actualizados con éxito');
+    });
+});
 
 
 const port = 3001;
