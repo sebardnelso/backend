@@ -110,48 +110,30 @@ app.get('/pedidos/:codcli', (req, res) => {
         res.send(results);
     });
 });
+
 app.post('/pedidos/verificar_realiza', (req, res) => {
     const { codcli, zona, username } = req.body;
-    
-    // Primero, seleccionamos las líneas correspondientes
-    const querySelect = 'SELECT id, realiza FROM aus_ped WHERE codcli = ? AND zona = ?';
-    
-    db.query(querySelect, [codcli, zona], (err, results) => {
+    const query = 'SELECT realiza FROM aus_ped WHERE codcli = ? AND zona = ?';
+    db.query(query, [codcli, zona], (err, results) => {
         if (err) {
             console.error('Error querying database:', err);
             res.status(500).json({ success: false, error: 'Internal Server Error' });
             return;
         }
-        
-        // Verificar si hay al menos una línea con `realiza` vacío
-        const linesToUpdate = results.filter(row => !row.realiza);
-        
-        if (linesToUpdate.length > 0) {
-            // Actualizar las líneas vacías con el `username`
-            const idsToUpdate = linesToUpdate.map(row => row.id);
-            const queryUpdate = 'UPDATE aus_ped SET realiza = ? WHERE id IN (?)';
-            
-            db.query(queryUpdate, [username, idsToUpdate], (updateErr) => {
-                if (updateErr) {
-                    console.error('Error updating database:', updateErr);
-                    res.status(500).json({ success: false, error: 'Internal Server Error' });
-                    return;
-                }
-                
-                // Permitir que el usuario continúe con el pedido
-                res.json({ success: true, canProceed: true });
-            });
-        } else if (results.length > 0) {
-            // Si no hay líneas vacías, verificar si el usuario actual es el que está realizando el pedido
+        if (results.length > 0) {
             const realiza = results[0].realiza;
-            if (realiza === username) {
+            if (!realiza) {
+                // Si el campo 'realiza' está vacío, permitir el pedido
+                res.json({ success: false });
+            } else if (realiza === username) {
+                // Si el campo 'realiza' coincide con el username, permitir el pedido
                 res.json({ success: true, canProceed: true });
             } else {
+                // Si el campo 'realiza' no coincide con el username, no permitir el pedido
                 res.json({ success: true, realiza, canProceed: false });
             }
         } else {
-            // No se encontraron líneas, permitir iniciar el pedido
-            res.json({ success: true, canProceed: true });
+            res.json({ success: false });
         }
     });
 });
