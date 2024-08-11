@@ -113,26 +113,31 @@ app.get('/pedidos/:codcli', (req, res) => {
 app.post('/pedidos/verificar_realiza', (req, res) => {
     const { codcli, zona, username } = req.body;
     const query = 'SELECT realiza FROM aus_ped WHERE codcli = ? AND zona = ?';
+    
     db.query(query, [codcli, zona], (err, results) => {
         if (err) {
             console.error('Error querying database:', err);
             res.status(500).json({ success: false, error: 'Internal Server Error' });
             return;
         }
-        if (results.length > 0) {
+        
+        // Verificar si hay al menos una línea con `realiza` vacío
+        const hasEmptyRealiza = results.some(row => !row.realiza);
+        
+        if (hasEmptyRealiza) {
+            // Si hay al menos una línea con `realiza` vacío, permitir que el usuario inicie el pedido
+            res.json({ success: true, canProceed: true });
+        } else if (results.length > 0) {
+            // Si no hay líneas vacías, verificar si el usuario actual es el que está realizando el pedido
             const realiza = results[0].realiza;
-            if (!realiza) {
-                // Si el campo 'realiza' está vacío, permitir el pedido
-                res.json({ success: false });
-            } else if (realiza === username) {
-                // Si el campo 'realiza' coincide con el username, permitir el pedido
+            if (realiza === username) {
                 res.json({ success: true, canProceed: true });
             } else {
-                // Si el campo 'realiza' no coincide con el username, no permitir el pedido
                 res.json({ success: true, realiza, canProceed: false });
             }
         } else {
-            res.json({ success: false });
+            // No se encontraron líneas, permitir iniciar el pedido
+            res.json({ success: true, canProceed: true });
         }
     });
 });
