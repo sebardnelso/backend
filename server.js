@@ -183,6 +183,7 @@ app.post('/pedidos/finalizar', (req, res) => {
     // Construir y ejecutar las consultas de actualización
     const queries = updates.map(update => {
         return new Promise((resolve, reject) => {
+            // Solo actualizamos cantidad_real, ter y codbarped, sin modificar codori
             const query = `
                 UPDATE aus_ped 
                 SET 
@@ -223,6 +224,7 @@ app.post('/pedidos/finalizar', (req, res) => {
             res.status(500).json({ success: false, error: 'Internal Server Error' });
         });
 });
+
 
 
 const port = 3001;
